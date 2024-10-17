@@ -1,0 +1,7 @@
+includedir=/usr/local/include
+
+Name: mooutils
+Description: Multi-objective optimization utilities
+URL: https://github.com/adbjesus/mooutils
+Version: 0.1.0
+Cflags: -I${includedir}
