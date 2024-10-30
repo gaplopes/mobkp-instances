@@ -3,8 +3,8 @@
 #include <cstring>
 #include <iostream>
 
-#include "../include/parser.hpp"
-#include "../include/solver.hpp"
+#include <parser.hpp>
+#include <solver.hpp>
 
 int main(int argc, char* argv[]) {
   if (argc < 2) {

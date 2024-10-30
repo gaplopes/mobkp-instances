@@ -1,3 +1,0 @@
-repository='https://github.com/adbjesus/mobkp.git'
-module=''
-tag='origin'

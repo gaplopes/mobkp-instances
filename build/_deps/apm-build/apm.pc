@@ -1,6 +1,0 @@
-includedir=/usr/local/include
-
-Name: APM
-Description: Anytime Performance Model for bi-objective optimization algorithms.
-Version: 0.1.1
-Cflags: -I${includedir}

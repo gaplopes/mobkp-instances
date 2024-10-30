@@ -1,3 +1,0 @@
-repository='https://github.com/adbjesus/apm.git'
-module=''
-tag='origin'

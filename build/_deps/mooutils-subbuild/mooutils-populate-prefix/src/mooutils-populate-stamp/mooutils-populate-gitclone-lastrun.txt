@@ -1,3 +1,0 @@
-repository='https://github.com/adbjesus/mooutils.git'
-module=''
-tag='origin'

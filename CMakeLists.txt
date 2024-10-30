@@ -6,6 +6,44 @@ project(mobkp-instances)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+# Set the build type to Release by default
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
+# Print the build type
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+
+# Warning flags
+set(MOBKP_CXX_WARN_FLAGS "")
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  list(APPEND MOBKP_CXX_WARN_FLAGS
+    -Wall
+    -Wextra
+    -Wpedantic
+    # -pedantic-errors
+    # -Wold-style-cast
+    # -Wundef
+    # -Wredundant-decls
+    # -Wcast-qual
+    # -Wmissing-include-dirs
+    # -Wdisabled-optimization
+    # -Wconversion
+    # -Wdouble-promotion
+    # -Wshadow
+    # -Wnull-dereference
+  )
+  if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+    list(APPEND MOBKP_CXX_WARN_FLAGS
+      -Wvector-operation-performance
+      -Wduplicated-cond
+    )
+  endif()
+else()
+  message(WARNING "Unknown compiler (not GNU, Clang, or MSVC), not setting any warning flags.")
+  set(MOBKP_CXX_WARN_FLAGS "")
+endif()
+
 # Find dependencies
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/modules")
 

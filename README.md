@@ -95,6 +95,10 @@ Example for different types of instances:
 
 The instances are stored in the `instances/` directory. A more detailed description of the instances is provided in the `instances/README.md` file.
 
+## Scripts
+
+The `scripts/` directory contains example scripts to generate instances.
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

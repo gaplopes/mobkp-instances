@@ -62,7 +62,8 @@ auto solve_mobkp(const Arguments &args, std::vector<data_type> points) {
       solutions = mobkp::fpsv_dp<solution_type>(problem, anytime_trace, timeout);
       break;
     default:
-      solutions = mobkp::nemull_dp<solution_type>(problem, anytime_trace, timeout);
+      // solutions = mobkp::nemull_dp<solution_type>(problem, anytime_trace, timeout);
+      solutions = mobkp::bhv_dp<solution_type>(problem, anytime_trace, timeout);
       break;
   }
   return std::make_pair(orig_problem, solutions);
@@ -106,7 +107,10 @@ void generate_corr_mobkp_test(const Arguments &args) {
   const std::string rho_str = fmt::format("{:.2f}", rho);
 
   const std::string command = fmt::format("./{} {} {} {} {} {} {} {}", r_script_path, n, m, rho, 0, weight_factor, seed, file_path);
-  system(command.c_str());
+  int result = system(command.c_str());
+  if (result != 0) {
+    throw std::runtime_error("Command execution failed with status: " + std::to_string(result));
+  }
 
   auto fin = std::fstream(file_path, std::ios::in);
   if (!fin.is_open()) {

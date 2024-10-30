@@ -1,6 +1,0 @@
-includedir=/usr/local/include
-
-Name: MOBKP
-Description: Anytime algorithms for the Multi-Objective Binary Knapsack Problem
-Version: 0.1.0
-Cflags: -I${includedir}
