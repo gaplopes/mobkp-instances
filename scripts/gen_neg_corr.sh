@@ -2,13 +2,20 @@
 
 trap "exit" INT
 
-ns=(50 100 200 300 400 500 600 700 800 900 1000 1500 2000)
-seeds=(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20)
-correlations=(-0.8 -0.5 -0.25 -0.1)
-
 type=1
-m=2
+m=3
 weight_factor=0.5
+
+ns=(20)
+seeds=(1 2 3 4 5 6 7 8 9 10)
+
+# Note that the maximum correlation value must be superior to -1/(m-1)
+# For example:
+# - If m=2, the maximum correlation value must be superior to -1
+# - If m=3, the maximum correlation value must be superior to -0.5 (-0.48)
+# - If m=4, the maximum correlation value must be superior to -0.33 (-0.31)
+# - If m=5, the maximum correlation value must be superior to -0.25 (-0.23)
+correlations=(-0.48 -0.25 -0.1)
 
 for n in ${ns[@]}; do
   for s in ${seeds[@]}; do

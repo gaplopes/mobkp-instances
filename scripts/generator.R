@@ -106,28 +106,3 @@ write.table(data, row.names = F, col.names = F)
 if (exists("outputfile")) {
   sink()
 }
-
-## Idea 2 with loadings factors
-
-## m <- 3
-## nf <- 2
-
-## l <- matrix(c(
-##   1, 0,
-##   -1, 0,
-##   0, 1
-## ), ncol = nf)
-
-## f <- matrix(c(
-##   1, 0.8,
-##   0.8, 1
-## ), ncol = nf)
-
-## r <- l %*% f %*% t(l)
-## r <- r / max(abs(r))
-## diag(r) <- 1
-
-## n <- 1000
-## rr <- 2 * sin(pi / 6 * r)
-## data <- pnorm(mvrnorm(n = n, mu = rep(0, m), Sigma = rr))
-## print(cor(data))

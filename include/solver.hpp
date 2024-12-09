@@ -29,7 +29,8 @@ void write_solution(const std::string &folder_path, const std::string &file_name
   if (!std::filesystem::exists(folder_path)) {
     std::filesystem::create_directory(folder_path);
   }
-  const std::string file_path = folder_path + "/" + file_name;
+  const std::string file_path = folder_path + file_name; // TODO: Verify this / is correct
+  // std::cout << "Saving solution to: " << file_path << std::endl;
   auto solution_stream = std::ofstream(file_path);
   fmt::print(solution_stream, "{} {}\n", problem.num_items(), problem.num_objectives());
   fmt::print(solution_stream, "{}\n", problem.weight_capacity(0));

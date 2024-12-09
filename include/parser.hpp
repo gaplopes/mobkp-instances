@@ -107,12 +107,12 @@ class Arguments {
     }
     if (type != 0) {
       if (type == 1) {
-        if (correlation >= 0.0 || correlation < -1.0) {
-          throw std::invalid_argument("Correlation must be between -1.0 and 0.0.");
+        if (correlation >= 0.0 || correlation <= -1.0 / (m - 1)) {
+          throw std::invalid_argument("Correlation must be between -1/(m-1) and 0.0.");
         }
       } else {
-        if (correlation <= 0.0 || correlation > 1.0) {
-          throw std::invalid_argument("Correlation must be between 0.0 and 1.0.");
+        if (correlation <= 0.0 || correlation >= 1.0 / (m - 1)) {
+          throw std::invalid_argument("Correlation must be between 0.0 and 1/(m-1).");
         }
       }
     }
