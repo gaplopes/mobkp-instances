@@ -50,12 +50,6 @@ cmake ..
 cmake --build .
 ```
 
-Then, you can run the executable to generate new instances. Example:
-
-```bash
-./mobkp-instances --type=0 --seed=1 --n=20 --m=3
-```
-
 ## Usage
 
 The `mobkp-instances` executable allows you to generate new instances for the MOBKP.
@@ -77,18 +71,20 @@ The following options are available:
   - If `--type=1`, then the correlation is the negative correlation factor and the value should be between 0 and -1.
   - If `--type=2`, then the correlation is the positive correlation factor and the value should be between 0 and 1.
 
-- `--outfile`: The file to save the instance.
-
 - `--timeout`: The maximum time to generate the instance.
 
 - `--weight-factor`: The factor to multiply the total sum of weights of the items.
 
+- `--outfile`: The file to save the instance.
+
+- `--folder-path`: The folder to save the instance.
+
 Example for different types of instances:
 
 ```bash
-./mobkp-instances --type=0 --seed=1 --n=20 --m=3 --timeout=10 // Random instance
-./mobkp-instances --type=1 --seed=1 --n=20 --m=3 --correlation=-0.5 --timeout=10 // Negative correlated instance
-./mobkp-instances --type=2 --seed=1 --n=20 --m=3 --correlation=0.5 --timeout=10 // Positive correlated instance
+./mobkp-instances --type=0 --n=20 --m=3 --seed=1 --timeout=10 --weight-factor=0.5 # Random instance
+./mobkp-instances --type=1 --n=20 --m=3 --seed=1 --correlation=-0.45 --timeout=10 --weight-factor=0.5 # Negative correlated instance
+./mobkp-instances --type=2 --n=20 --m=3 --seed=1 --correlation=0.45 --timeout=10 --weight-factor=0.5 # Positive correlated instance
 ```
 
 ## Instances

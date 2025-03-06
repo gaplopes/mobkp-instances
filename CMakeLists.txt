@@ -92,6 +92,17 @@ if (NOT apm_FOUND)
   add_library(apm::apm ALIAS apm)
 endif()
 
+find_package(CLI11 QUIET)
+if (NOT CLI11_FOUND)
+  include(FetchContent)
+  FetchContent_Declare(
+    cli11
+    GIT_REPOSITORY https://github.com/CLIUtils/CLI11
+    GIT_TAG        v2.4.2
+  )
+  FetchContent_MakeAvailable(cli11)
+endif()
+
 find_package(glpk REQUIRED)
 find_package(fmt REQUIRED)
 find_package(Boost REQUIRED)
@@ -102,7 +113,7 @@ include_directories(${CMAKE_SOURCE_DIR}/apps/include)
 
 # Add the executable and specify the source files
 add_executable(mobkp-instances
-  ${CMAKE_SOURCE_DIR}/apps/instances.cpp
+  ${CMAKE_SOURCE_DIR}/apps/mobkp_instances.cpp
   # Add other source files if necessary
 )
 
@@ -112,6 +123,7 @@ target_link_libraries(mobkp-instances
     mooutils::mooutils 
     fmt::fmt 
     Boost::headers
+    CLI11::CLI11
 )
 
 # Set compile options

@@ -5,6 +5,8 @@
 #include <fmt/ranges.h>
 
 #include <boost/multiprecision/cpp_int.hpp>
+#include <cassert>
+#include <filelock.hpp>
 #include <filesystem>
 #include <fstream>
 #include <mobkp/anytime_trace.hpp>
@@ -24,12 +26,48 @@ using hv_data_type = boost::multiprecision::int256_t;
 using problem_type = mobkp::ordered_problem<mobkp::problem<data_type>>;
 using solution_type = mobkp::solution<problem_type, dvec_type, ovec_type, cvec_type>;
 
-void write_solution(const std::string &folder_path, const std::string &file_name,
-                    const mobkp::problem<data_type> &problem, const mooutils::unordered_set<solution_type> &solutions) {
+namespace mobkp_instances {
+
+void save_stats_to_file(const std::string &folder_path,
+                        int32_t n, int32_t m, double rho, int64_t seed,
+                        double time, int32_t n_solutions) {
   if (!std::filesystem::exists(folder_path)) {
     std::filesystem::create_directory(folder_path);
   }
-  const std::string file_path = folder_path + file_name; // TODO: Verify this / is correct
+  const std::string file_name = "times.csv";
+  const std::string file_path = folder_path + file_name;
+
+  // Open the file in append mode
+  std::ofstream file_stream(file_path, std::ios::app);
+  if (!file_stream.is_open()) {
+    std::cerr << "Failed to open file: " << file_path << " - " << strerror(errno) << std::endl;
+    return;
+  }
+
+  FILE *file_ptr = fopen(file_path.c_str(), "a");
+  if (!file_ptr) {
+    throw std::runtime_error("Failed to get file descriptor");
+  }
+
+  int fd = fileno(file_ptr);
+  if (fd == -1) {
+    throw std::runtime_error("Failed to get file descriptor number");
+  }
+
+  {  // RAII scope for file lock
+    FileLock lock(fd);
+    fmt::print(file_stream, "{} {} {} {:.4f} {:.4f} {}\n",
+               m, n, seed, rho, time, n_solutions);
+  }
+}
+
+void write_solution(const std::string &folder_path, const std::string &file_name,
+                    const mobkp::problem<data_type> &problem,
+                    const mooutils::unordered_set<solution_type> &solutions) {
+  if (!std::filesystem::exists(folder_path)) {
+    std::filesystem::create_directory(folder_path);
+  }
+  const std::string file_path = folder_path + file_name;  // TODO: Verify this / is correct
   // std::cout << "Saving solution to: " << file_path << std::endl;
   auto solution_stream = std::ofstream(file_path);
   fmt::print(solution_stream, "{} {}\n", problem.num_items(), problem.num_objectives());
@@ -44,17 +82,13 @@ void write_solution(const std::string &folder_path, const std::string &file_name
   solution_stream.close();
 }
 
-auto solve_mobkp(const Arguments &args, std::vector<data_type> points) {
-  const double timeout = args.get_timeout();
-  const int32_t n = args.get_n();
-  const int32_t m = args.get_m();
-
+auto solve_mobkp(const double timeout, const int32_t n, const int32_t m, std::vector<data_type> points) {
   const auto orig_problem = mobkp::problem<data_type>(n, m, 1, std::move(points));
 
   std::vector<size_t> index_order(n);
   std::iota(index_order.begin(), index_order.end(), 0);
-
   const auto problem = problem_type(orig_problem, index_order);
+
   auto solutions = mooutils::unordered_set<solution_type>();
   auto hvref = ovec_type(m, -1);
   auto anytime_trace = mobkp::anytime_trace(mooutils::incremental_hv<hv_data_type, ovec_type>(hvref));
@@ -70,11 +104,20 @@ auto solve_mobkp(const Arguments &args, std::vector<data_type> points) {
   return std::make_pair(orig_problem, solutions);
 }
 
-void generate_random_mobkp_test(const Arguments &args, const int32_t MAX = 300) {
-  const int32_t n = args.get_n();
-  const int32_t m = args.get_m();
-  std::srand(args.get_seed());
-
+void random_mobkp(const int32_t n, const int32_t m, const int64_t seed,
+                  const double weight_factor, const double timeout,
+                  const std::string folder_path, const std::string outfile,
+                  const int64_t MAX = 300) {
+  // Validate the input parameters
+  assert(m > 1);
+  assert(n > 0);
+  assert(seed >= 0);
+  assert(rho >= -1.0 && rho <= 1.0);
+  assert(weight_factor >= 0.0 && weight_factor <= 1.0);
+  assert(timeout > 0.0);
+  // Seed the random number generator
+  std::srand(seed);
+  // Generate the instance values
   std::vector<int64_t> points(n * (m + 1));
   int64_t total_weight = 0;
   for (int i = 0; i < n; i++) {
@@ -87,38 +130,51 @@ void generate_random_mobkp_test(const Arguments &args, const int32_t MAX = 300) 
     points[(i * (m + 1)) + m] = weight;
     total_weight += weight;
   }
-  int64_t W = std::round(total_weight * args.get_weight_factor());
+  int64_t W = std::round(total_weight * weight_factor);
   points.insert(points.begin(), W);
-
-  auto problem_solutions = solve_mobkp(args, points);
+  // Solve the instance
+  auto start_time = std::chrono::high_resolution_clock::now();
+  auto problem_solutions = solve_mobkp(timeout, n, m, points);
+  auto end_time = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::duration<double>>(end_time - start_time);
   auto problem = problem_solutions.first;
   auto solutions = problem_solutions.second;
-
-  write_solution(args.get_folder_path(), args.get_outfile(), problem, solutions);
+  // Save the stats and solutions
+  save_stats_to_file(folder_path, n, m, 0, seed, duration.count(), solutions.size());
+  write_solution(folder_path, outfile, problem, solutions);
 }
 
-void generate_corr_mobkp_test(const Arguments &args) {
-  const int32_t n = args.get_n();
-  const int32_t m = args.get_m();
-  const double rho = args.get_correlation();
-  const int64_t seed = args.get_seed();
-  const double weight_factor = args.get_weight_factor();
-  const std::string file_path = args.get_folder_path() + "/" + args.get_outfile();
+void corr_mobkp(const int32_t n, const int32_t m, const double rho, const int64_t seed,
+                const double weight_factor, const double timeout,
+                const std::string folder_path, const std::string outfile) {
+  // Validate the input parameters
+  assert(m > 1);
+  assert(n > 0);
+  assert(seed >= 0);
+  assert(rho >= -1.0 && rho <= 1.0);
+  assert(weight_factor >= 0.0 && weight_factor <= 1.0);
+  assert(timeout > 0.0);
+  // Set the file path
+  std::string file_path = "";
+  if (folder_path.back() != '/') {
+    file_path = folder_path + "/" + outfile;
+  } else {
+    file_path = folder_path + outfile;
+  }
+  // Generate the instance using R script
   const std::string r_script_path = "../scripts/generator.R";
   const std::string rho_str = fmt::format("{:.2f}", rho);
-
   const std::string command = fmt::format("./{} {} {} {} {} {} {} {}", r_script_path, n, m, rho, 0, weight_factor, seed, file_path);
   int result = system(command.c_str());
   if (result != 0) {
     throw std::runtime_error("Command execution failed with status: " + std::to_string(result));
   }
-
+  // Read the instance from the file
   auto fin = std::fstream(file_path, std::ios::in);
   if (!fin.is_open()) {
     fmt::print("Error: Could not open file {}\n", file_path);
     exit(1);
   }
-
   int32_t _n, _m;
   fin >> _n >> _m;
   int64_t W;
@@ -136,12 +192,32 @@ void generate_corr_mobkp_test(const Arguments &args) {
     points[(i * (_m + 1)) + _m] = weight;
   }
   points.insert(points.begin(), W);
-
-  auto problem_solutions = solve_mobkp(args, points);
+  // Solve the instance
+  auto start_time = std::chrono::high_resolution_clock::now();
+  auto problem_solutions = solve_mobkp(timeout, n, m, points);
+  auto end_time = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::duration<double>>(end_time - start_time);
   auto problem = problem_solutions.first;
   auto solutions = problem_solutions.second;
-
-  write_solution(args.get_folder_path(), args.get_outfile(), problem, solutions);
+  // Save the stats and solutions
+  save_stats_to_file(folder_path, n, m, rho, seed, duration.count(), solutions.size());
+  write_solution(folder_path, outfile, problem, solutions);
 }
+
+void random_mobkp(const Parameters &params) {
+  random_mobkp(params.n, params.m, params.seed,
+               params.weight_factor, params.timeout,
+               params.folder_path,
+               params.outfile);
+}
+
+void corr_mobkp(const Parameters &params) {
+  corr_mobkp(params.n, params.m, params.correlation, params.seed,
+             params.weight_factor, params.timeout,
+             params.folder_path,
+             params.outfile);
+}
+
+}  // namespace mobkp_instances
 
 #endif  // SOLVER_HPP
