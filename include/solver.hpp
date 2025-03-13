@@ -18,6 +18,7 @@
 #include <random>
 #include <vector>
 
+// Type definitions for MOBKP solver
 using data_type = int_fast64_t;
 using dvec_type = std::vector<bool>;
 using ovec_type = std::vector<data_type>;
@@ -28,13 +29,25 @@ using solution_type = mobkp::solution<problem_type, dvec_type, ovec_type, cvec_t
 
 namespace mobkp_instances {
 
+namespace internal {
+/**
+ * @brief Saves instance statistics to a CSV file
+ *
+ * @param folder_path Path to store the statistics file
+ * @param n Number of variables
+ * @param m Number of objectives
+ * @param rho Correlation coefficient
+ * @param seed Random seed
+ * @param time Solution time in seconds
+ * @param n_solutions Number of non-dominated solutions
+ */
 void save_stats_to_file(const std::string &folder_path,
                         int32_t n, int32_t m, double rho, int64_t seed,
                         double time, int32_t n_solutions) {
   if (!std::filesystem::exists(folder_path)) {
     std::filesystem::create_directory(folder_path);
   }
-  const std::string file_name = "times.csv";
+  const std::string file_name = fmt::format("times{}D.csv", m);
   const std::string file_path = folder_path + file_name;
 
   // Open the file in append mode
@@ -56,19 +69,27 @@ void save_stats_to_file(const std::string &folder_path,
 
   {  // RAII scope for file lock
     FileLock lock(fd);
-    fmt::print(file_stream, "{} {} {} {:.4f} {:.4f} {}\n",
+    fmt::print(file_stream, "{},{},{},{:.4f},{:.4f},{}\n",
                m, n, seed, rho, time, n_solutions);
   }
 }
 
+/**
+ * @brief Writes solution data to output file
+ *
+ * @param folder_path Path to store the solution
+ * @param file_name Output file name
+ * @param problem The MOBKP problem instance
+ * @param solutions Set of non-dominated solutions
+ */
 void write_solution(const std::string &folder_path, const std::string &file_name,
                     const mobkp::problem<data_type> &problem,
                     const mooutils::unordered_set<solution_type> &solutions) {
   if (!std::filesystem::exists(folder_path)) {
     std::filesystem::create_directory(folder_path);
   }
-  const std::string file_path = folder_path + file_name;  // TODO: Verify this / is correct
-  // std::cout << "Saving solution to: " << file_path << std::endl;
+  const std::string file_path = folder_path + file_name;
+  std::cout << "Saving solution to: " << file_path << std::endl;
   auto solution_stream = std::ofstream(file_path);
   fmt::print(solution_stream, "{} {}\n", problem.num_items(), problem.num_objectives());
   fmt::print(solution_stream, "{}\n", problem.weight_capacity(0));
@@ -82,6 +103,15 @@ void write_solution(const std::string &folder_path, const std::string &file_name
   solution_stream.close();
 }
 
+/**
+ * @brief Solves a MOBKP instance using Dynamic Programming
+ *
+ * @param timeout Maximum solution time in seconds
+ * @param n Number of variables
+ * @param m Number of objectives
+ * @param points Vector with problem data
+ * @return Pair of problem instance and non-dominated solutions
+ */
 auto solve_mobkp(const double timeout, const int32_t n, const int32_t m, std::vector<data_type> points) {
   const auto orig_problem = mobkp::problem<data_type>(n, m, 1, std::move(points));
 
@@ -104,6 +134,9 @@ auto solve_mobkp(const double timeout, const int32_t n, const int32_t m, std::ve
   return std::make_pair(orig_problem, solutions);
 }
 
+/**
+ * @brief Generates random MOBKP instance and solves it
+ */
 void random_mobkp(const int32_t n, const int32_t m, const int64_t seed,
                   const double weight_factor, const double timeout,
                   const std::string folder_path, const std::string outfile,
@@ -144,9 +177,12 @@ void random_mobkp(const int32_t n, const int32_t m, const int64_t seed,
   write_solution(folder_path, outfile, problem, solutions);
 }
 
-void corr_mobkp(const int32_t n, const int32_t m, const double rho, const int64_t seed,
-                const double weight_factor, const double timeout,
-                const std::string folder_path, const std::string outfile) {
+/**
+ * @brief Generates correlated MOBKP instance and solves it
+ */
+void correlated_mobkp(const int32_t n, const int32_t m, const double rho, const int64_t seed,
+                      const double weight_factor, const double timeout,
+                      const std::string folder_path, const std::string outfile) {
   // Validate the input parameters
   assert(m > 1);
   assert(n > 0);
@@ -155,12 +191,7 @@ void corr_mobkp(const int32_t n, const int32_t m, const double rho, const int64_
   assert(weight_factor >= 0.0 && weight_factor <= 1.0);
   assert(timeout > 0.0);
   // Set the file path
-  std::string file_path = "";
-  if (folder_path.back() != '/') {
-    file_path = folder_path + "/" + outfile;
-  } else {
-    file_path = folder_path + outfile;
-  }
+  std::string file_path = folder_path + outfile;
   // Generate the instance using R script
   const std::string r_script_path = "../scripts/generator.R";
   const std::string rho_str = fmt::format("{:.2f}", rho);
@@ -204,18 +235,30 @@ void corr_mobkp(const int32_t n, const int32_t m, const double rho, const int64_
   write_solution(folder_path, outfile, problem, solutions);
 }
 
-void random_mobkp(const Parameters &params) {
-  random_mobkp(params.n, params.m, params.seed,
-               params.weight_factor, params.timeout,
-               params.folder_path,
-               params.outfile);
+}  // namespace internal
+
+/**
+ * @brief Interface to generate random MOBKP instance
+ * 
+ * @param params Parameters object with instance settings
+ */
+void random(const Parameters &params) {
+  internal::random_mobkp(params.n, params.m, params.seed,
+                         params.weight_factor, params.timeout,
+                         params.folder_path,
+                         params.outfile);
 }
 
-void corr_mobkp(const Parameters &params) {
-  corr_mobkp(params.n, params.m, params.correlation, params.seed,
-             params.weight_factor, params.timeout,
-             params.folder_path,
-             params.outfile);
+/**
+ * @brief Interface to generate correlated MOBKP instance
+ * 
+ * @param params Parameters object with instance settings
+ */
+void correlated(const Parameters &params) {
+  internal::correlated_mobkp(params.n, params.m, params.correlation, params.seed,
+                             params.weight_factor, params.timeout,
+                             params.folder_path,
+                             params.outfile);
 }
 
 }  // namespace mobkp_instances
