@@ -8,7 +8,6 @@
 #include <iostream>
 #include <parameters.hpp>
 #include <solver.hpp>
-#include <test.hpp>
 
 int main(int argc, char* argv[]) {
   try {
@@ -52,11 +51,11 @@ int main(int argc, char* argv[]) {
     // Generate the instance
     switch (type) {
       case 0:
-        mobkp_instances::random_mobkp(params);
+        mobkp_instances::random(params);
         break;
       case 1:
       case 2:
-        mobkp_instances::corr_mobkp(params);
+        mobkp_instances::correlated(params);
         break;
       default:
         throw std::invalid_argument("Invalid instance type");
