@@ -12,7 +12,7 @@ The instances are stored in the following structure:
 
 ```
 instances/
-├── neg_corr/
+├── negative/
 │   ├── 2D/
 │   │   ├── 100_2_-0.25.in
 │   │   ├── ...
@@ -20,7 +20,7 @@ instances/
 │   │   ├── 100_3_-0.25.in
 │   │   ├── ...
 │   │── ...
-├── pos_corr/
+├── positive/
 │   ├── 2D/
 │   │   ├── 100_2_0.25.in
 │   │   ├── ...
@@ -41,8 +41,8 @@ instances/
 
 From the root folder, the instances are divided into three subfolders:
 
-- `neg_corr`: instances with negative correlation between objectives;
-- `pos_corr`: instances with positive correlation between objectives;
+- `negative`: instances with negative correlation between objectives;
+- `positive`: instances with positive correlation between objectives;
 - `random`: instances with random correlation between objectives.
 
 Each subfolder contains a set of subfolders, one for each dimension of the problem. Each of these subfolders contains the instances for that dimension.
@@ -56,26 +56,26 @@ Each instance, depending on the type of instance, is stored in a file with a spe
 The instances are named according to the following pattern:
 
 ```
-n_m.in
+n_s.in
 ```
 
 where:
 
 - `n` is the number of items;
-- `m` is the number of objectives.
+- `s` is the seed used to generate the instance.
 
 ### Correlated instances
 
 The instances are named according to the following pattern:
 
 ```
-n_m_c.in
+n_s_c.in
 ```
 
 where:
 
 - `n` is the number of items;
-- `m` is the number of objectives;
+- `s` is the seed used to generate the instance;
 - `c` is the correlation between objectives.
 
 ## Instances structure
