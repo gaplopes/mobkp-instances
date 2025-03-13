@@ -1,29 +1,15 @@
 # mobkp-instances
 
-## Introduction
+## Overview
 
-This repository contains instances with respective complete non-dominated set (Pareto front) for the Multi-Objective Binary Knapsack Problem (MOBKP).
-Moreover, it contains a library to generate new instances for the MOBKP.
+This repository contains a library for generating and solving instances for the Multi-Objective Binary Knapsack Problem (MOBKP).
+Moreover, it also contains instances with respective complete non-dominated set (Pareto front) for the MOBKP for different number of objectives and items.
 
-The MOBKP is a multi-objective optimization problem where the goal is to maximize multiple objectives subject to a set of constraints.
-The MOBKP is defined as follows:
-
-```
-maximize f(x) = (f_1(x), f_2(x), ..., f_m(x))
-subject to
-  sum_{j=1}^{n} w_{j} x_{j} <= c
-  x_{j} in {0, 1} for j = 1, ..., n
-```
-
-where:
-- `n` is the number of items.
-- `m` is the number of objectives.
-- `w_{j}` is the weight of item `j`.
-- `c` is the capacity of the knapsack.
-- `x_{j}` is a binary variable that indicates if item `j` is selected.
-- `f_i(x)` is the value of the `i-th` objective function for the solution `x`.
-
-The MOBKP is a well-known combinatorial optimization problem with applications in several areas, such as finance, engineering, and logistics.
+## Features
+- Generate random MOBKP instances
+- Generate correlated MOBKP instances (positive or negative correlation)
+- Save instance data and solutions to files
+- Track performance metrics
 
 ## Dependencies
 
@@ -49,6 +35,28 @@ cd build
 cmake ..
 cmake --build .
 ```
+
+## Problem Definition
+
+The MOBKP is a multi-objective optimization problem where the goal is to maximize multiple objectives subject to a set of constraints.
+The MOBKP is defined as follows:
+
+```
+maximize f(x) = (f_1(x), f_2(x), ..., f_m(x))
+subject to
+  sum_{j=1}^{n} w_{j} x_{j} <= c
+  x_{j} in {0, 1} for j = 1, ..., n
+```
+
+where:
+- `n` is the number of items.
+- `m` is the number of objectives.
+- `w_{j}` is the weight of item `j`.
+- `c` is the capacity of the knapsack.
+- `x_{j}` is a binary variable that indicates if item `j` is selected.
+- `f_i(x)` is the value of the `i-th` objective function for the solution `x`.
+
+The MOBKP is a well-known combinatorial optimization problem with applications in several areas, such as finance, engineering, and logistics.
 
 ## Usage
 
@@ -91,6 +99,39 @@ Example for different types of instances:
 
 The instances are stored in the `instances/` directory. A more detailed description of the instances is provided in the `instances/README.md` file.
 
+## Library Functions
+
+The library provides the following parameters and functions to generate instances:
+
+### Parameter Handling
+
+```cpp
+#include <parameters.hpp>
+
+// Create parameters for instance generation
+mobkp_instances::Parameters params(
+    int32_t type,           // 0: random, 1: negative correlation, 2: positive correlation
+    int32_t n,              // Number of items
+    int32_t m,              // Number of objectives
+    int64_t seed,           // Random seed
+    double correlation,     // Correlation coefficient (-1 to 1)
+    double weight_factor,   // Weight capacity factor (0 to 1)
+    double timeout,         // Maximum solution time in seconds
+    std::string folder_path, // Output folder path
+    std::string outfile     // Output file name
+);
+```
+
+### Instance Generation
+
+```cpp
+// Generate a random MOBKP instance
+mobkp_instances::random(params);
+
+// Generate a correlated MOBKP instance (positive or negative)
+mobkp_instances::correlated(params);
+```
+
 ## Scripts
 
 The `scripts/` directory contains example scripts to generate instances.
@@ -101,16 +142,14 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## References
 
-If you use these instances, please cite in your work:
+If you use these library or instances, please cite in your work:
 
 ```
 @misc{mobkp-instances,
   author = {Lopes, Gonçalo},
   title = {Instances for Multi-Objective Knapsack Problem (MOBKP)},
-  year = {2024},
   publisher = {GitHub},
   howpublished = {\url{https://github.com/gaplopes/mobkp-instances}},
-  note = {Accessed: <today>}
 }
 ```
 
