@@ -15,12 +15,9 @@ Moreover, it also contains instances with respective complete non-dominated set 
 
 This library depends on:
 
-- [mobkp](https://github.com/adbjesus/mobkp) for multi-objective optimization utilities, such as quality indicators and solution sets.
-- [mooutils](https://github.com/adbjesus/mooutils) for multi-objective optimization utilities, such as quality indicators and solution sets.
-- [apm](https://github.com/adbjesus/apm) for a theoretical anytime performance model that guides one of the algorithms.
-- [glpk](https://www.gnu.org/software/glpk/)
-- [fmt](https://github.com/fmtlib/fmt)
-- [Boost](https://www.boost.org/)
+- [mobkp](https://github.com/adbjesus/mobkp): Algorithms to solve the MOBKP instances. (See dependencies of this library in its repository)
+- [mooutils](https://github.com/adbjesus/mooutils): Multi-objective optimization utilities, such as quality indicators.
+- [CLI11](https://github.com/CLIUtils/CLI11)
 
 ## Installation
 

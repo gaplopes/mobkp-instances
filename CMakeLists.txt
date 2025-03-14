@@ -79,19 +79,6 @@ if (NOT mooutils_FOUND)
   add_library(mooutils::mooutils ALIAS mooutils)
 endif()
 
-find_package(apm QUIET)
-# If mooutils not found fallback to github
-if (NOT apm_FOUND)
-  include(FetchContent)
-  FetchContent_Declare(
-    apm
-    GIT_REPOSITORY https://github.com/adbjesus/apm.git
-    GIT_TAG main
-  )
-  FetchContent_MakeAvailable(apm)
-  add_library(apm::apm ALIAS apm)
-endif()
-
 find_package(CLI11 QUIET)
 if (NOT CLI11_FOUND)
   include(FetchContent)
@@ -103,9 +90,7 @@ if (NOT CLI11_FOUND)
   FetchContent_MakeAvailable(cli11)
 endif()
 
-find_package(glpk REQUIRED)
 find_package(fmt REQUIRED)
-find_package(Boost REQUIRED)
 
 # Add include directories
 include_directories(${CMAKE_SOURCE_DIR}/include)
@@ -121,8 +106,7 @@ add_executable(mobkp-instances
 target_link_libraries(mobkp-instances 
     mobkp::mobkp 
     mooutils::mooutils 
-    fmt::fmt 
-    Boost::headers
+    fmt::fmt
     CLI11::CLI11
 )
 
