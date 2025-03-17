@@ -2,8 +2,19 @@
 
 ## Overview
 
-This repository contains a library for generating and solving instances for the Multi-Objective Binary Knapsack Problem (MOBKP).
-Moreover, it also contains instances with respective complete non-dominated set (Pareto front) for the MOBKP for different number of objectives and items.
+This repository contains instances with the respective complete non-dominated set (Pareto front) for the Multi-Objective Binary Knapsack Problem (MOBKP) for different number of objectives and items.
+
+Moreover, it also contains a library for generating and solving instances for the MOBKP for any number of objectives and items.
+
+There are three types of instances available:
+- Random instances.
+- Negative correlated objectives instances.
+- Positive correlated objectives instances.
+
+The random instances are generated with random weights and values for the items.
+The correlated instances are generated with correlated objectives, where the correlation can be positive or negative.
+
+This library uses the [mobkp](https://github.com/adbjesus/mobkp) library to solve the MOBKP instances with some of the state-of-the-art algorithms and the procedure described in [Algorithm Selection for Multi-Objective Optimization](https://hal.science/tel-03936989) by Jesus in Section 4.2.1 to generate the correlated instances.
 
 ## Features
 - Generate random MOBKP instances
@@ -139,16 +150,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## References
 
-If you use these library or instances, please cite in your work:
-
-```
-@misc{mobkp-instances,
-  author = {Lopes, Gonçalo},
-  title = {Instances for Multi-Objective Knapsack Problem (MOBKP)},
-  publisher = {GitHub},
-  howpublished = {\url{https://github.com/gaplopes/mobkp-instances}},
-}
-```
+If you use these library or instances, please cite in your work using the citation available in the repository.
 
 ## Contributing
 
@@ -156,4 +158,4 @@ Contributions are welcome! If you have any instances or improvements to add, ple
 
 ## Contact
 
-For any questions or issues, please open an issue on the repository or contact the author at galopes@dei.uc.pt.
+For any questions or issues, please open an issue on the repository or contact the author at galopes@dei.uc.pt or via GitHub or LinkedIn (see profile for contact information).
