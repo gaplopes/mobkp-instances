@@ -1,10 +1,25 @@
-cff-version: 1.0.0
-message: "If you use this software, please cite it as below."
+abstract: '<p>First release for <code>mobkp-instances</code>.</p>
+
+  <p>This repository contains instances with the respective complete non-dominated
+  set (Pareto front) for the Multi-Objective Knapsack Problem (MOKP) for different
+  numbers of objectives and items.</p>'
 authors:
-- family-names: "Lopes"
-  given-names: "Gonçalo"
-  orcid: "https://orcid.org/0000-0003-4192-689X"
-title: "mobkp-instances"
-doi: 10.5281/zenodo.15038573
-date-released: 2022
-url: "https://github.com/gaplopes/mobkp-instances"
+- affiliation: University of Coimbra
+  family-names: "Gon\xE7alo Lopes"
+cff-version: 1.2.0
+date-released: 2025-03
+doi: 10.5281/zenodo.15038574
+identifiers:
+- type: swh
+  value: swh:1:dir:184423da8ebefae335615c39caf6c05b56d5ca34;origin=https://doi.org/10.5281/zenodo.15038573;visit=swh:1:snp:a2ab9eebb024a48e35d7c9d898b65d05ed6268cc;anchor=swh:1:rel:1b00cc1d77885f2ad9af8ac4b34ac60c9f84263c;path=gaplopes-mobkp-instances-3bc1b77
+keywords:
+- multi-objective
+- knapsack
+- instances
+- non-dominated set
+- Pareto front
+license:
+- mit
+title: 'gaplopes/mobkp-instances: v1.0.0'
+type: dataset
+version: v1.0.0
