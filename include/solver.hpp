@@ -193,7 +193,7 @@ void correlated_mobkp(const int32_t n, const int32_t m, const double rho, const 
   // Set the file path
   std::string file_path = folder_path + outfile;
   // Generate the instance using R script
-  const std::string r_script_path = "../scripts/generator.R";
+  const std::string r_script_path = "../include/generator.R";
   const std::string rho_str = fmt::format("{:.2f}", rho);
   const std::string command = fmt::format("./{} {} {} {} {} {} {} {}", r_script_path, n, m, rho, 0, weight_factor, seed, file_path);
   int result = system(command.c_str());
