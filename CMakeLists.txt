@@ -54,7 +54,6 @@ include(FetchContent)
 find_package(mobkp QUIET)
 # If mobkp not found fallback to github
 if (NOT mobkp)
-  include(FetchContent)
   FetchContent_Declare(
     mobkp
     GIT_REPOSITORY https://github.com/adbjesus/mobkp.git
@@ -69,7 +68,6 @@ endif()
 find_package(mooutils QUIET)
 # If mooutils not found fallback to github
 if (NOT mooutils_FOUND)
-  include(FetchContent)
   FetchContent_Declare(
     mooutils
     GIT_REPOSITORY https://github.com/adbjesus/mooutils.git

@@ -1,6 +1,15 @@
 #ifndef FILELOCK_HPP
 #define FILELOCK_HPP
 
+/**
+ * @file filelock.hpp
+ * @brief RAII-based file locking utility
+ *
+ * Provides a FileLock class for safe, exception-safe file locking using
+ * the POSIX flock() system call. Useful for concurrent file access when
+ * multiple processes may write to the same statistics file.
+ */
+
 // System includes for file locking functionality
 #include <errno.h>     // For errno variable and error codes
 #include <fcntl.h>     // File control options

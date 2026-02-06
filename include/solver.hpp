@@ -1,6 +1,18 @@
 #ifndef SOLVER_HPP
 #define SOLVER_HPP
 
+/**
+ * @file solver.hpp
+ * @brief MOBKP instance generation and solving functionality
+ *
+ * This header provides functions for generating and solving Multi-Objective
+ * Binary Knapsack Problem (MOBKP) instances. It supports:
+ * - Random instance generation with uniform distributions
+ * - Correlated instance generation (positive/negative correlation between objectives)
+ * - Solving instances using dynamic programming algorithms from the mobkp library
+ * - Saving solutions and statistics to files
+ */
+
 #include <fmt/core.h>
 #include <fmt/ranges.h>
 
@@ -50,28 +62,25 @@ void save_stats_to_file(const std::string &folder_path,
   const std::string file_name = fmt::format("times{}D.csv", m);
   const std::string file_path = folder_path + file_name;
 
-  // Open the file in append mode
-  std::ofstream file_stream(file_path, std::ios::app);
-  if (!file_stream.is_open()) {
+  // Open file with C-style API for proper locking
+  FILE *file_ptr = fopen(file_path.c_str(), "a");
+  if (!file_ptr) {
     std::cerr << "Failed to open file: " << file_path << " - " << strerror(errno) << std::endl;
     return;
   }
 
-  FILE *file_ptr = fopen(file_path.c_str(), "a");
-  if (!file_ptr) {
-    throw std::runtime_error("Failed to get file descriptor");
-  }
-
   int fd = fileno(file_ptr);
   if (fd == -1) {
+    fclose(file_ptr);
     throw std::runtime_error("Failed to get file descriptor number");
   }
 
   {  // RAII scope for file lock
     FileLock lock(fd);
-    fmt::print(file_stream, "{},{},{},{:.4f},{:.4f},{}\n",
+    fmt::print(file_ptr, "{},{},{},{:.4f},{:.4f},{}\n",
                m, n, seed, rho, time, n_solutions);
   }
+  fclose(file_ptr);
 }
 
 /**
@@ -139,24 +148,24 @@ auto solve_mobkp(const double timeout, const int32_t n, const int32_t m, std::ve
  */
 void random_mobkp(const int32_t n, const int32_t m, const int64_t seed,
                   const double weight_factor, const double timeout,
-                  const std::string folder_path, const std::string outfile,
+                  const std::string &folder_path, const std::string &outfile,
                   const int64_t MAX = 300) {
   // Validate the input parameters
   assert(m > 1);
   assert(n > 0);
   assert(seed >= 0);
-  assert(rho >= -1.0 && rho <= 1.0);
   assert(weight_factor >= 0.0 && weight_factor <= 1.0);
   assert(timeout > 0.0);
-  // Seed the random number generator
-  std::srand(seed);
+  // Random number generator
+  std::mt19937_64 rng(static_cast<uint64_t>(seed));
+  std::uniform_int_distribution<int64_t> dist(1, MAX);
   // Generate the instance values
   std::vector<int64_t> points(n * (m + 1));
   int64_t total_weight = 0;
   for (int i = 0; i < n; i++) {
-    int64_t weight = (std::rand() % (MAX - 1)) + 1;
+    int64_t weight = dist(rng);
     for (int j = 0; j < m; j++) {
-      int64_t num = (std::rand() % (MAX - 1)) + 1;
+      int64_t num = dist(rng);
       int32_t index = (i * (m + 1)) + j;
       points[index] = num;
     }
@@ -182,7 +191,8 @@ void random_mobkp(const int32_t n, const int32_t m, const int64_t seed,
  */
 void correlated_mobkp(const int32_t n, const int32_t m, const double rho, const int64_t seed,
                       const double weight_factor, const double timeout,
-                      const std::string folder_path, const std::string outfile) {
+                      const std::string &folder_path, const std::string &outfile,
+                      const std::string &r_script_path = "") {
   // Validate the input parameters
   assert(m > 1);
   assert(n > 0);
@@ -192,19 +202,18 @@ void correlated_mobkp(const int32_t n, const int32_t m, const double rho, const 
   assert(timeout > 0.0);
   // Set the file path
   std::string file_path = folder_path + outfile;
+  // Determine R script path (use default if not provided)
+  std::string script_path = r_script_path.empty() ? "../include/generator.R" : r_script_path;
   // Generate the instance using R script
-  const std::string r_script_path = "../include/generator.R";
-  const std::string rho_str = fmt::format("{:.2f}", rho);
-  const std::string command = fmt::format("./{} {} {} {} {} {} {} {}", r_script_path, n, m, rho, 0, weight_factor, seed, file_path);
+  const std::string command = fmt::format("./{} {} {} {} {} {} {} {}", script_path, n, m, rho, 0, weight_factor, seed, file_path);
   int result = system(command.c_str());
   if (result != 0) {
-    throw std::runtime_error("Command execution failed with status: " + std::to_string(result));
+    throw std::runtime_error(fmt::format("R script execution failed with status: {}. Script path: {}", result, script_path));
   }
   // Read the instance from the file
   auto fin = std::fstream(file_path, std::ios::in);
   if (!fin.is_open()) {
-    fmt::print("Error: Could not open file {}\n", file_path);
-    exit(1);
+    throw std::runtime_error(fmt::format("Could not open generated instance file: {}", file_path));
   }
   int32_t _n, _m;
   fin >> _n >> _m;
@@ -258,7 +267,8 @@ void correlated(const Parameters &params) {
   internal::correlated_mobkp(params.n, params.m, params.correlation, params.seed,
                              params.weight_factor, params.timeout,
                              params.folder_path,
-                             params.outfile);
+                             params.outfile,
+                             params.r_script_path);
 }
 
 }  // namespace mobkp_instances

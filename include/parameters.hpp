@@ -1,6 +1,14 @@
 #ifndef PARAMETERS_HPP
 #define PARAMETERS_HPP
 
+/**
+ * @file parameters.hpp
+ * @brief Parameter handling for MOBKP instance generation
+ *
+ * This header defines the Parameters struct used to configure MOBKP instance
+ * generation, including validation of parameter ranges and automatic path setup.
+ */
+
 #include <fmt/format.h>  // For string formatting
 
 #include <filesystem>  // For directory and file path handling
@@ -25,6 +33,7 @@ struct Parameters {
   double timeout;
   std::string folder_path;
   std::string outfile;
+  std::string r_script_path;
 
   /**
    * @brief Constructs a Parameters object with the given values
@@ -38,11 +47,15 @@ struct Parameters {
    * @param timeout Maximum solution time in seconds
    * @param folder_path Path to save the instance files (optional)
    * @param outfile Output file name (optional)
+   * @param r_script_path Path to the R generator script (optional, uses default if empty)
    */
   Parameters(int32_t type, int32_t n, int32_t m, int64_t seed,
              double correlation, double weight_factor, double timeout,
-             std::string folder_path, std::string outfile)
-      : type(type), n(n), m(m), seed(seed), correlation(correlation), weight_factor(weight_factor), timeout(timeout), folder_path(folder_path), outfile(outfile) {
+             std::string folder_path, std::string outfile,
+             std::string r_script_path = "")
+      : type(type), n(n), m(m), seed(seed), correlation(correlation),
+        weight_factor(weight_factor), timeout(timeout),
+        folder_path(folder_path), outfile(outfile), r_script_path(r_script_path) {
     validate();     // Validate the parameters
     setup_paths();  // Set up paths if not provided
   }
