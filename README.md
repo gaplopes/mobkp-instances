@@ -70,22 +70,22 @@ The MOBKP is a well-known combinatorial optimization problem with applications i
 
 The `mobkp-instances` executable allows you to generate new instances for the MOBKP.
 
-The following options are available:
+### Single Instance Mode
 
-- `--type`: The type of instance to generate. The following types are available:
+Basic options for generating a single instance:
+
+- `--type`: The type of instance to generate:
   - `0`: Random instances.
   - `1`: Negative correlated objectives instances.
   - `2`: Positive correlated objectives instances.
-
-- `--seed`: The seed to use for the random number generator.
 
 - `--n`: The number of items in the instance.
 
 - `--m`: The number of objectives in the instance.
 
-- `--correlation`: The correlation between the objectives. The following values are available:
-  - If `--type=1`, then the correlation is the negative correlation factor and the value should be between 0 and -1.
-  - If `--type=2`, then the correlation is the positive correlation factor and the value should be between 0 and 1.
+- `--seed`: The seed to use for the random number generator.
+
+- `--correlation`: The correlation between the objectives.
 
 - `--timeout`: The maximum time to generate the instance.
 
@@ -95,12 +95,54 @@ The following options are available:
 
 - `--folder-path`: The folder to save the instance.
 
-Example for different types of instances:
+- `--r-script`: Path to the R generator script (for correlated instances).
+
+### Batch Processing Mode
+
+Generate multiple instances in a single command:
+
+- `--n-range`: Range of n values in format `start-end:step` or `start-end`. Example: `20-100:10`
+
+- `--seed-range`: Range of seed values in format `start-end`. Example: `1-10`
+
+- `--correlation-list`: Comma-separated correlation values. Example: `-0.45,-0.25,-0.1`
+
+### Correlation Constraints
+
+> **Important:** For correlated instances, the absolute value of correlation must be less than `1/(m-1)` where `m` is the number of objectives. This constraint ensures the correlation matrix remains positive definite.
+>
+> Examples:
+> - For `m=2`: correlation must be in `(-1, 0)` for negative or `(0, 1)` for positive
+> - For `m=3`: correlation must be in `(-0.45, 0)` for negative or `(0, 0.45)` for positive
+> - For `m=4`: correlation must be in `(-0.30, 0)` for negative or `(0, 0.30)` for positive
+> - For `m=5`: correlation must be in `(-0.20, 0)` for negative or `(0, 0.20)` for positive
+
+### Examples
+
+Single instance generation:
 
 ```bash
-./mobkp-instances --type=0 --n=20 --m=3 --seed=1 --timeout=10 --weight-factor=0.5 # Random instance
-./mobkp-instances --type=1 --n=20 --m=3 --seed=1 --correlation=-0.45 --timeout=10 --weight-factor=0.5 # Negative correlated instance
-./mobkp-instances --type=2 --n=20 --m=3 --seed=1 --correlation=0.45 --timeout=10 --weight-factor=0.5 # Positive correlated instance
+# Random instance
+./mobkp-instances --type=0 --n=20 --m=3 --seed=1 --timeout=10 --weight-factor=0.5
+
+# Negative correlated instance (m=3, so |correlation| < 0.5)
+./mobkp-instances --type=1 --n=20 --m=3 --seed=1 --correlation=-0.45 --timeout=10
+
+# Positive correlated instance (m=3, so |correlation| < 0.5)
+./mobkp-instances --type=2 --n=20 --m=3 --seed=1 --correlation=0.45 --timeout=10
+```
+
+Batch processing:
+
+```bash
+# Generate random instances for n=50,100,150,200 with seeds 1-5
+./mobkp-instances --type=0 --m=2 --n-range=50-200:50 --seed-range=1-5
+
+# Generate negative correlated instances with multiple correlations
+./mobkp-instances --type=1 --m=3 --n-range=20-50:10 --seed-range=1-3 --correlation-list=-0.45,-0.25,-0.1
+
+# Generate positive correlated instances with multiple correlations
+./mobkp-instances --type=2 --m=3 --n-range=20-50:10 --seed-range=1-3 --correlation-list=0.45,0.25,0.1
 ```
 
 ## Instances
